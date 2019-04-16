@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
+use Auth;
 
 class AdminDetailsController extends Controller
 {

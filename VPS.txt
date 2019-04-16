@@ -1,0 +1,8 @@
+VPS
+RanPanel Server
+IP: 167.179.82.184
+DB User: sa
+DB: 8XRJ@e!FG*Mll!jL
+
+VPS User: Administrator
+VPS Pass: iNewWorks2019!!

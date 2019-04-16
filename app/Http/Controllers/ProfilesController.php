@@ -14,8 +14,10 @@ use Illuminate\Support\Facades\Input;
 use Illuminate\Support\Facades\Session;
 use Image;
 use jeremykenedy\Uuid\Uuid;
+use App\Rules\ValidatePassword;
 use Validator;
 use View;
+use Auth;
 
 class ProfilesController extends Controller
 {
@@ -32,111 +34,88 @@ class ProfilesController extends Controller
         $this->middleware('auth');
     }
 
-    /**
-     * Get a validator for an incoming registration request.
-     *
-     * @param array $data
-     *
-     * @return \Illuminate\Contracts\Validation\Validator
-     */
-    public function profile_validator(array $data)
-    {
-        return Validator::make($data, [
-            'theme_id'         => '',
-            'location'         => '',
-            'bio'              => 'max:500',
-            'twitter_username' => 'max:50',
-            'github_username'  => 'max:50',
-            'avatar'           => '',
-            'avatar_status'    => '',
-        ]);
+    public function ipaddress(){
+        $ip = new CaptureIpTrait();
+        return $ip->getClientIp();
+    }
+
+    public function index(){
+        $user = Auth::user();
+        return view('pages.user.profile.index',compact('user'));
     }
 
     /**
-     * Fetch user
-     * (You can extract this to repository method).
+     * Upload and Update user avatar.
      *
-     * @param $username
+     * @param $file
      *
      * @return mixed
      */
+    public function upload(Request $request)
+    {
+        $valid = Validator::make($request->all(),[
+            'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+        ]);
+        if ($valid->fails()) {
+            return back()->withErrors($valid)->withInput();
+        }
+        $currentUser = \Auth::user();
+        $avatar = Input::file('file');
+        $filename = 'avatar.'.$avatar->getClientOriginalExtension();
+        $save_path = storage_path().'/users/id/'.$currentUser->id.'/uploads/images/avatar/';
+        $path = $save_path.$filename;
+        $public_path = '/images/profile/'.$currentUser->id.'/avatar/'.$filename;
+
+        // Make the user a folder and set permissions
+        File::makeDirectory($save_path, $mode = 0755, true, true);
+
+        // Save the file to the server
+        Image::make($avatar)->resize(300, 300)->save($save_path.$filename);
+
+        // Save the public image path
+        $currentUser->profile->avatar = $public_path;
+        $currentUser->profile->avatar_status = 1;
+        $currentUser->profile->save();
+            Auth::user()->timeline()->create([
+                'content'       =>  'Avatar was successfully updated.',
+                'remark'        =>  'avatar_update',
+                'ip_address'    => $this->ipaddress()
+            ]);
+        return back()->with('success','Avatar was successfully updated.');
+    }
+
+    /**
+     * Show user avatar.
+     *
+     * @param $id
+     * @param $image
+     *
+     * @return string
+     */
+    public function userProfileAvatar($id, $image)
+    {
+        return Image::make(storage_path().'/users/id/'.$id.'/uploads/images/avatar/'.$image)->response();
+    }
+
     public function getUserByUsername($username)
     {
         return User::with('profile')->wherename($username)->firstOrFail();
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param string $username
-     *
-     * @return Response
-     */
-    public function show($username)
+    public function profile_validator(array $data)
     {
-        try {
-            $user = $this->getUserByUsername($username);
-        } catch (ModelNotFoundException $exception) {
-            abort(404);
-        }
-
-        $currentTheme = Theme::find($user->profile->theme_id);
-
-        $data = [
-            'user'         => $user,
-            'currentTheme' => $currentTheme,
-        ];
-
-        return view('profiles.show')->with($data);
+        return Validator::make($data, [
+            'first_name'            => 'required|min:4',
+            'last_name'             => 'required|min:4',
+            'bio'                   => 'max:500',
+            'password'              => ['required','max:20','min:6',new ValidatePassword(auth()->user())]
+        ]);
     }
 
-    /**
-     * /profiles/username/edit.
-     *
-     * @param $username
-     *
-     * @return mixed
-     */
-    public function edit($username)
-    {
-        try {
-            $user = $this->getUserByUsername($username);
-        } catch (ModelNotFoundException $exception) {
-            return view('pages.status')
-                ->with('error', trans('profile.notYourProfile'))
-                ->with('error_title', trans('profile.notYourProfileTitle'));
-        }
-
-        $themes = Theme::where('status', 1)
-                        ->orderBy('name', 'asc')
-                        ->get();
-
-        $currentTheme = Theme::find($user->profile->theme_id);
-
-        $data = [
-            'user'         => $user,
-            'themes'       => $themes,
-            'currentTheme' => $currentTheme,
-
-        ];
-
-        return view('profiles.edit')->with($data);
-    }
-
-    /**
-     * Update a user's profile.
-     *
-     * @param $username
-     *
-     * @throws Laracasts\Validation\FormValidationException
-     *
-     * @return mixed
-     */
-    public function update($username, Request $request)
-    {
+    public function update($username, Request $request){
         $user = $this->getUserByUsername($username);
 
-        $input = Input::only('theme_id', 'location', 'bio', 'twitter_username', 'github_username', 'avatar_status');
+        $input = Input::only('bio');
 
         $ipAddress = new CaptureIpTrait();
 
@@ -158,247 +137,15 @@ class ProfilesController extends Controller
 
         $user->save();
 
-        return redirect('profile/'.$user->name.'/edit')->with('success', trans('profile.updateSuccess'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int                      $id
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function updateUserAccount(Request $request, $id)
-    {
-        $currentUser = \Auth::user();
-        $user = User::findOrFail($id);
-        $emailCheck = ($request->input('email') != '') && ($request->input('email') != $user->email);
-        $ipAddress = new CaptureIpTrait();
-        $rules = [];
-
-        if ($user->name != $request->input('name')) {
-            $usernameRules = [
-                'name' => 'required|max:255|unique:users',
-            ];
-        } else {
-            $usernameRules = [
-                'name' => 'required|max:255',
-            ];
-        }
-        if ($emailCheck) {
-            $emailRules = [
-                'email' => 'email|max:255|unique:users',
-            ];
-        } else {
-            $emailRules = [
-                'email' => 'email|max:255',
-            ];
-        }
-        $additionalRules = [
-            'first_name' => 'nullable|string|max:255',
-            'last_name'  => 'nullable|string|max:255',
-        ];
-
-        $rules = array_merge($usernameRules, $emailRules, $additionalRules);
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-
-        $user->name = $request->input('name');
+        $user = Auth::user();
         $user->first_name = $request->input('first_name');
         $user->last_name = $request->input('last_name');
-
-        if ($emailCheck) {
-            $user->email = $request->input('email');
-        }
-
-        $user->updated_ip_address = $ipAddress->getClientIp();
-
         $user->save();
-
-        return redirect('profile/'.$user->name.'/edit')->with('success', trans('profile.updateAccountSuccess'));
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int                      $id
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function updateUserPassword(Request $request, $id)
-    {
-        $currentUser = \Auth::user();
-        $user = User::findOrFail($id);
-        $ipAddress = new CaptureIpTrait();
-
-        $validator = Validator::make($request->all(),
-            [
-                'password'              => 'required|min:6|max:20|confirmed',
-                'password_confirmation' => 'required|same:password',
-            ],
-            [
-                'password.required' => trans('auth.passwordRequired'),
-                'password.min'      => trans('auth.PasswordMin'),
-                'password.max'      => trans('auth.PasswordMax'),
-            ]
-        );
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-
-        if ($request->input('password') != null) {
-            $user->password = bcrypt($request->input('password'));
-        }
-
-        $user->updated_ip_address = $ipAddress->getClientIp();
-
-        $user->save();
-
-        return redirect('profile/'.$user->name.'/edit')->with('success', trans('profile.updatePWSuccess'));
-    }
-
-    /**
-     * Upload and Update user avatar.
-     *
-     * @param $file
-     *
-     * @return mixed
-     */
-    public function upload()
-    {
-        if (Input::hasFile('file')) {
-            $currentUser = \Auth::user();
-            $avatar = Input::file('file');
-            $filename = 'avatar.'.$avatar->getClientOriginalExtension();
-            $save_path = storage_path().'/users/id/'.$currentUser->id.'/uploads/images/avatar/';
-            $path = $save_path.$filename;
-            $public_path = '/images/profile/'.$currentUser->id.'/avatar/'.$filename;
-
-            // Make the user a folder and set permissions
-            File::makeDirectory($save_path, $mode = 0755, true, true);
-
-            // Save the file to the server
-            Image::make($avatar)->resize(300, 300)->save($save_path.$filename);
-
-            // Save the public image path
-            $currentUser->profile->avatar = $public_path;
-            $currentUser->profile->save();
-
-            return response()->json(['path' => $path], 200);
-        } else {
-            return response()->json(false, 200);
-        }
-    }
-
-    /**
-     * Show user avatar.
-     *
-     * @param $id
-     * @param $image
-     *
-     * @return string
-     */
-    public function userProfileAvatar($id, $image)
-    {
-        return Image::make(storage_path().'/users/id/'.$id.'/uploads/images/avatar/'.$image)->response();
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int                      $id
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function deleteUserAccount(Request $request, $id)
-    {
-        $currentUser = \Auth::user();
-        $user = User::findOrFail($id);
-        $ipAddress = new CaptureIpTrait();
-
-        $validator = Validator::make($request->all(),
-            [
-                'checkConfirmDelete' => 'required',
-            ],
-            [
-                'checkConfirmDelete.required' => trans('profile.confirmDeleteRequired'),
-            ]
-        );
-
-        if ($user->id != $currentUser->id) {
-            return redirect('profile/'.$user->name.'/edit')->with('error', trans('profile.errorDeleteNotYour'));
-        }
-
-        if ($validator->fails()) {
-            return back()->withErrors($validator)->withInput();
-        }
-
-        // Create and encrypt user account restore token
-        $sepKey = $this->getSeperationKey();
-        $userIdKey = $this->getIdMultiKey();
-        $restoreKey = config('settings.restoreKey');
-        $encrypter = config('settings.restoreUserEncType');
-        $level1 = $user->id * $userIdKey;
-        $level2 = urlencode(Uuid::generate(4).$sepKey.$level1);
-        $level3 = base64_encode($level2);
-        $level4 = openssl_encrypt($level3, $encrypter, $restoreKey);
-        $level5 = base64_encode($level4);
-
-        // Save Restore Token and Ip Address
-        $user->token = $level5;
-        $user->deleted_ip_address = $ipAddress->getClientIp();
-        $user->save();
-
-        // Send Goodbye email notification
-        $this->sendGoodbyEmail($user, $user->token);
-
-        // Soft Delete User
-        $user->delete();
-
-        // Clear out the session
-        $request->session()->flush();
-        $request->session()->regenerate();
-
-        return redirect('/login/')->with('success', trans('profile.successUserAccountDeleted'));
-    }
-
-    /**
-     * Send GoodBye Email Function via Notify.
-     *
-     * @param array  $user
-     * @param string $token
-     *
-     * @return void
-     */
-    public static function sendGoodbyEmail(User $user, $token)
-    {
-        $user->notify(new SendGoodbyeEmail($token));
-    }
-
-    /**
-     * Get User Restore ID Multiplication Key.
-     *
-     * @return string
-     */
-    public function getIdMultiKey()
-    {
-        return $this->idMultiKey;
-    }
-
-    /**
-     * Get User Restore Seperation Key.
-     *
-     * @return string
-     */
-    public function getSeperationKey()
-    {
-        return $this->seperationKey;
+            Auth::user()->timeline()->create([
+                'content'       =>  trans('profile.updateSuccess'),
+                'remark'        =>  'profile_update',
+                'ip_address'    => $this->ipaddress()
+            ]);
+        return back()->with('success', trans('profile.updateSuccess'));
     }
 }

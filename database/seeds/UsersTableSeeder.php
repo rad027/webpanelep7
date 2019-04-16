@@ -1,8 +1,11 @@
 <?php
 
+use App\Models\Points;
+use App\Models\AboutUs;
 use App\Models\Profile;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use App\Models\RanUser\UserInfo4;
 use jeremykenedy\LaravelRoles\Models\Role;
 
 class UsersTableSeeder extends Seeder
@@ -24,7 +27,7 @@ class UsersTableSeeder extends Seeder
         $user = User::where('email', '=', $seededAdminEmail)->first();
         if ($user === null) {
             $user = User::create([
-                'name'                           => $faker->userName,
+                'name'                           => 'admin',
                 'first_name'                     => $faker->firstName,
                 'last_name'                      => $faker->lastName,
                 'email'                          => $seededAdminEmail,
@@ -35,38 +38,32 @@ class UsersTableSeeder extends Seeder
                 'admin_ip_address'               => $faker->ipv4,
             ]);
 
-            $user->profile()->save($profile);
-            $user->attachRole($adminRole);
-            $user->save();
-        }
-
-        // Seed test user
-        $user = User::where('email', '=', 'user@user.com')->first();
-        if ($user === null) {
-            $user = User::create([
-                'name'                           => $faker->userName,
-                'first_name'                     => $faker->firstName,
-                'last_name'                      => $faker->lastName,
-                'email'                          => 'user@user.com',
-                'password'                       => Hash::make('password'),
-                'token'                          => str_random(64),
-                'activated'                      => true,
-                'signup_ip_address'              => $faker->ipv4,
-                'signup_confirmation_ip_address' => $faker->ipv4,
+            UserInfo4::create([
+                'UserName' => 'admin',
+                'UserID' => 'admin',
+                'UserPass' => strtoupper(substr(md5(Hash::make('password')),0,19)),
+                'UserPass2' => strtoupper(substr(md5(Hash::make('1234')),0,19)),
+                'UserEmail' => $seededAdminEmail,
+                'UserSQ' => '1',
+                'UserSA' => 'adminpogi',
+                'UserAvailable' => 0,
+                'ChaRemain' => 3
             ]);
 
-            $user->profile()->save(new Profile());
-            $user->attachRole($userRole);
+            AboutUs::create([
+                'user_id'       =>  '1',
+                'content'       =>  'Welcome to <b>'.config('app.name').'</b>! Enjoy your visit here.',
+                'updated_by'    =>  '1'
+            ]);
+
+            $user->profile()->save($profile);
+            $user->attachRole($adminRole);
+
+            $user->points()->create([
+                'points'    =>  0,
+                'Vpoints'   =>  0
+            ]); 
             $user->save();
         }
-
-        // Seed test users
-        // $user = factory(App\Models\Profile::class, 5)->create();
-        // $users = User::All();
-        // foreach ($users as $user) {
-        //     if (!($user->isAdmin()) && !($user->isUnverified())) {
-        //         $user->attachRole($userRole);
-        //     }
-        // }
     }
 }

@@ -2,6 +2,8 @@
 
 return [
 
+    'app_config' => env('APP_INSTALL'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -64,7 +66,7 @@ return [
     |
     */
 
-    'timezone' => 'UTC',
+    'timezone' => 'Asia/Manila',
 
     /*
     |--------------------------------------------------------------------------
@@ -227,6 +229,133 @@ return [
         'Gravatar'     => Creativeorange\Gravatar\Facades\Gravatar::class,
         'Image'        => Intervention\Image\Facades\Image::class,
         'Uuid'         => Webpatser\Uuid\Uuid::class,
+        'HTMLMin'       => HTMLMin\HTMLMin\Facades\HTMLMin::class,
     ],
 
+    //Web Setting
+
+    'reborn_system' =>  env('REBORN_SYSTEM',1),
+
+    //Reborn Stage 1
+    'reborn' => [
+        '1' => [
+            'level'     => env('REBORN1_LEVEL'),
+            'gold'      => env('REBORN1_GOLD'),
+            'reward'    => env('REBORN1_REWARD'),
+            'from'      => env('REBORN1_COUNT_FROM'),
+            'to'        => env('REBORN1_COUNT_TO')
+        ],
+        '2' => [
+            'status'    => env('REBORN2_STATUS'),
+            'level'     => env('REBORN2_LEVEL'),
+            'gold'      => env('REBORN2_GOLD'),
+            'reward'    => env('REBORN2_REWARD'),
+            'from'      => env('REBORN2_COUNT_FROM'),
+            'to'        => env('REBORN2_COUNT_TO')
+        ],
+        '3' => [
+            'status'    => env('REBORN3_STATUS'),
+            'level'     => env('REBORN3_LEVEL'),
+            'gold'      => env('REBORN3_GOLD'),
+            'reward'    => env('REBORN3_REWARD'),
+            'from'      => env('REBORN3_COUNT_FROM'),
+            'to'        => env('REBORN3_COUNT_TO')
+        ],
+        '4' => [
+            'status'    => env('REBORN4_STATUS'),
+            'level'     => env('REBORN4_LEVEL'),
+            'gold'      => env('REBORN4_GOLD'),
+            'reward'    => env('REBORN4_REWARD'),
+            'from'      => env('REBORN4_COUNT_FROM'),
+            'to'        => env('REBORN4_COUNT_TO')
+        ],
+        '5' => [
+            'status'    => env('REBORN5_STATUS'),
+            'level'     => env('REBORN5_LEVEL'),
+            'gold'      => env('REBORN5_GOLD'),
+            'reward'    => env('REBORN5_REWARD'),
+            'from'      => env('REBORN5_COUNT_FROM'),
+            'to'        => env('REBORN5_COUNT_TO')
+        ],
+    ],
+
+    'change_school' => [
+        'currency'          =>  env('CHANGE_SCHOOL_CURRENCY'),
+        'required_amount'   =>  env('CHANGE_SCHOOL_REQUIRED_AMOUNT'),
+    ],
+
+    'change_class'  =>  [
+        'currency'                  => env('CHANGE_CLASS_CURRENCY'),
+        'required_amount'           => env('CHANGE_CLASS_AMOUNT'),
+        'change_class_archer'       => env('CHANGE_CLASS_ARCHER'),
+        'change_class_brawler'      => env('CHANGE_CLASS_BRAWLER'),
+        'change_class_swordsman'    => env('CHANGE_CLASS_SWORDSMAN'),
+        'change_class_shaman'       => env('CHANGE_CLASS_SHAMAN'),
+        'change_class_gunner'       => env('CHANGE_CLASS_GUNNER')
+    ],
+
+    'pk_points' =>  [
+        'currency'          =>  env('PK_POINTS_CURRENCY'),
+        'required_amount'   =>  env('PK_POINTS_AMOUNT')
+    ],
+
+    'stats_points' =>  [
+        'currency'          =>  env('STATISTICAL_POINTS_CURRENCY'),
+        'required_amount'   =>  env('STATISTICAL_POINTS_AMOUNT')
+    ],
+
+    'timeline' => [
+        'statsreset'            =>  'Statistical Points Reset',
+        'pkpointsreset'         =>  'PK Points Reset',
+        'maxrbreward'           =>  'Max Reborn Reward',
+        'change_class'          =>  'Change Class',
+        'change_school'         =>  'Change School',
+        'topupcode'             =>  'Top Up Codes',
+        'reborn'                =>  'Reborn System',
+        'itemshop'              =>  'Item Mall',
+        'itemmall'              =>  'Item Mall',
+        'insertpoints'          =>  'Insert Points',
+        'announcement'          =>  'News & Announcements',
+        'downloads'             =>  'Download Page',
+        'aboutus'               =>  'About Us Process',
+        'password'              =>  'Password Update',
+        'avatar_update'         =>  'Avatar/Profile Picture Update',
+        'profile_update'        =>  'Profile Information Update',
+        'user_update'           =>  'User Update',
+        'webinfo'               =>  'Web Information Update',
+        'metainfo'              =>  'Meta Information Update',
+        'mailserver'            =>  'Mail Server Information Update',
+        'license_update'        =>  'License Information Update',
+        'helpdesk'              =>  'Helpdesk',
+        'votepage'              =>  'Voting System',
+        'knowledgebase'         =>  'Knowledge Base',
+        'convert_points'        =>  'Points Convertion'
+    ],
+
+    'convert_points'    =>  [
+        //VP TO EP
+        'FROM_VP_TO_EP_REQUIRED_AMOUNT'         =>  env('FROM_VP_TO_EP_REQUIRED_AMOUNT'),
+        'FROM_VP_TO_EP_AMOUNT'                  =>  env('FROM_VP_TO_EP_AMOUNT'),
+        //EP TO VP
+        'FROM_EP_TO_VP_REQUIRED_AMOUNT'         =>  env('FROM_EP_TO_VP_REQUIRED_AMOUNT'),
+        'FROM_EP_TO_VP_AMOUNT'                  =>  env('FROM_EP_TO_VP_AMOUNT'),
+        //VP TO GOLD
+        'FROM_VP_TO_GOLD_REQUIRED_AMOUNT'       =>  env('FROM_VP_TO_GOLD_REQUIRED_AMOUNT'),
+        'FROM_VP_TO_GOLD_AMOUNT'                =>  env('FROM_VP_TO_GOLD_AMOUNT'),
+        //EP TO GOLD
+        'FROM_EP_TO_GOLD_REQUIRED_AMOUNT'       =>  env('FROM_EP_TO_GOLD_REQUIRED_AMOUNT'),
+        'FROM_EP_TO_GOLD_AMOUNT'                =>  env('FROM_EP_TO_GOLD_AMOUNT'),
+        //VP TO PP
+        'FROM_VP_TO_PP_REQUIRED_AMOUNT'         =>  env('FROM_VP_TO_PP_REQUIRED_AMOUNT'),
+        'FROM_VP_TO_PP_AMOUNT'                  =>  env('FROM_VP_TO_PP_AMOUNT'),
+        //EP TO PP
+        'FROM_EP_TO_PP_REQUIRED_AMOUNT'         =>  env('FROM_EP_TO_PP_REQUIRED_AMOUNT'),
+        'FROM_EP_TO_PP_AMOUNT'                  =>  env('FROM_EP_TO_PP_AMOUNT'),
+        //VP TO ZG
+        'FROM_VP_TO_ZG_REQUIRED_AMOUNT'         =>  env('FROM_VP_TO_ZG_REQUIRED_AMOUNT'),
+        'FROM_VP_TO_ZG_AMOUNT'                  =>  env('FROM_VP_TO_ZG_AMOUNT'),
+        //EP TO ZG
+        'FROM_EP_TO_ZG_REQUIRED_AMOUNT'         =>  env('FROM_EP_TO_ZG_REQUIRED_AMOUNT'),
+        'FROM_EP_TO_ZG_AMOUNT'                  =>  env('FROM_EP_TO_ZG_AMOUNT'),
+    ],
 ];

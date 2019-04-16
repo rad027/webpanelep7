@@ -66,5 +66,7 @@ class Kernel extends HttpKernel
         'permission'    => \jeremykenedy\LaravelRoles\Middleware\VerifyPermission::class,
         'level'         => \jeremykenedy\LaravelRoles\Middleware\VerifyLevel::class,
         'currentUser'   => \App\Http\Middleware\CheckCurrentUser::class,
+        'installed'     => \App\Http\Middleware\installed::class,
+        'laravel'       => \Illuminate\Session\Middleware\Laravel::class,
     ];
 }

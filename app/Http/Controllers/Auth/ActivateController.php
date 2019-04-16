@@ -13,14 +13,15 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use jeremykenedy\LaravelRoles\Models\Role;
+use Illuminate\Support\Facades\Session;
 
 class ActivateController extends Controller
 {
     use ActivationTrait;
 
-    private static $userHomeRoute = 'public.home';
-    private static $adminHomeRoute = 'public.home';
-    private static $activationView = 'auth.activation';
+    private static $userHomeRoute = 'home';
+    private static $adminHomeRoute = 'home';
+    private static $activationView = 'pages.activate';
     private static $activationRoute = 'activation-required';
 
     /**
@@ -87,12 +88,12 @@ class ActivateController extends Controller
             Log::info('Activated user attempted to visit '.$currentRoute.'. ', [$user]);
 
             if ($user->isAdmin()) {
-                return redirect()->route(self::getAdminHomeRoute())
+                return redirect(self::getAdminHomeRoute())
                 ->with('status', 'info')
                 ->with('message', trans('auth.alreadyActivated'));
             }
 
-            return redirect()->route(self::getUserHomeRoute())
+            return redirect(self::getUserHomeRoute())
                 ->with('status', 'info')
                 ->with('message', trans('auth.alreadyActivated'));
         }
@@ -118,7 +119,7 @@ class ActivateController extends Controller
 
         $data = [
             'email' => $user->email,
-            'date'  => $lastActivation->created_at->format('m/d/Y'),
+            'date'  => $lastActivation->created_at->format('F d, Y h:i a'),
         ];
 
         return view($this->getActivationView())->with($data);
@@ -204,6 +205,15 @@ class ActivateController extends Controller
         $user->attachRole($role);
         $user->signup_confirmation_ip_address = $ipAddress->getClientIp();
         $user->profile()->save($profile);
+        $user->UserInfo4()->update([
+            'UserAvailable' => 1
+        ]);
+        if($user->UserInfo4()->first()->Activation == 0){
+            Session::put('set_password',true);
+        }
+		$user->points()->update([
+			'Vpoints' => '10000'
+		]);
         $user->save();
 
         $allActivations = Activation::where('user_id', $user->id)->get();
@@ -219,7 +229,7 @@ class ActivateController extends Controller
             ->with('message', trans('auth.successActivated'));
         }
 
-        return redirect()->route(self::getUserHomeRoute())
+        return redirect(self::getUserHomeRoute())
             ->with('status', 'success')
             ->with('message', trans('auth.successActivated'));
     }

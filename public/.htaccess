@@ -4,7 +4,8 @@
     </IfModule>
 
     RewriteEngine On
-
+	RewriteCond %{HTTPS} !=on
+	RewriteRule ^.*$ https://%{SERVER_NAME}%{REQUEST_URI} [R,L]
     # Redirect Trailing Slashes If Not A Folder...
     RewriteCond %{REQUEST_FILENAME} !-d
     RewriteRule ^(.*)/$ /$1 [L,R=301]

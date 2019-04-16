@@ -19,7 +19,7 @@ class User extends Authenticatable
      *
      * @var string
      */
-    protected $table = 'users';
+    protected $connection = 'sqlsrv';
 
     /**
      * The attributes that are not mass assignable.
@@ -112,4 +112,69 @@ class User extends Authenticatable
     {
         return $this->profiles()->detach($profile);
     }
+
+    public function UserInfo4()
+    {
+        return $this->hasMany('App\Models\RanUser\UserInfo4','UserID','name');
+    }   
+
+    public function UserInfo4_2()
+    {
+        return $this->belongsTo('App\Models\RanUser\UserInfo4');
+    }   
+
+    public function Points()
+    {
+        return $this->hasMany('App\Models\Points');
+    }  
+
+    public function TopUp()
+    {
+        return $this->hasMany('App\Models\TopUp');
+    }    
+
+    public function VotePanel()
+    {
+        return $this->hasMany('App\Models\VotePanel');
+    }   
+
+    public function Timeline()
+    {
+        return $this->hasMany('App\Models\Timeline');
+    }   
+
+    public function Announcement()
+    {
+        return $this->hasMany('App\Models\Announcement');
+    }   
+
+    public function Downloads()
+    {
+        return $this->hasMany('App\Models\Downloads');
+    }   
+
+    public function Cart()
+    {
+        return $this->hasMany('App\Models\Cart');
+    }  
+
+    public function Helpdesk()
+    {
+        return $this->hasMany('App\Models\Helpdesk');
+    }   
+
+    public function VoteTopSite()
+    {
+        return $this->hasMany('App\Models\VoteTopSite');
+    }   
+
+    public function VoteLog()
+    {
+        return $this->hasMany('App\Models\VoteLog');
+    }   
+
+    public function AboutUs()
+    {
+        return $this->hasMany('App\Models\AboutUs');
+    }   
 }

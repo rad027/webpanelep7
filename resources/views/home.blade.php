@@ -1,17 +1,15 @@
-@extends('layouts.app')
+@extends('adminlte::page')
+
+@section('title', 'AdminLTE')
+
+@section('content_header')
+    <h1>Dashboard</h1>
+@stop
+
+@php
+use App\Models\User;
+@endphp
 
 @section('content')
-<div class="container">
-    <div class="row">
-        <div class="col-md-10 offset-md-1">
-            <div class="card">
-                <div class="card-header">Dashboard</div>
-
-                <div class="card-body">
-                    You are logged in!
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-@endsection
+{{ date('F d, Y h:i A',strtotime(Auth::user()->UserInfo4()->first()->LastLoginDate)) }}
+@stop

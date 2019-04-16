@@ -25,6 +25,19 @@ return [
     'activationThanks'   => 'Thank you for using our application!',
 
     /*
+     * Restore your account email.
+     *
+     */
+
+    'restoreSubject'  => 'Activation required',
+    'restoreGreeting' => 'Welcome!',
+    'restoreMessage'  => 'You need to restore your account before you can start using all of our services.',
+    'restoreButton'   => 'Restore',
+    'restoreThanks'   => 'Thank you for using our application!',
+
+
+
+    /*
      * Goobye email.
      *
      */

@@ -1,100 +1,51 @@
-<!DOCTYPE html>
-<html lang="{{ config('app.locale') }}">
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+@extends('adminlte::page')
 
-        <title>Laravel</title>
+@section('title', 'Home')
 
-        <!-- Fonts -->
-        <link href="https://fonts.googleapis.com/css?family=Raleway:100,600" rel="stylesheet" type="text/css">
+@section('content_header')
+    
+@stop
 
-        <!-- Styles -->
-        <style>
-            html, body {
-                background-color: #fff;
-                color: #636b6f;
-                font-family: 'Raleway', sans-serif;
-                font-weight: 100;
-                height: 100vh;
-                margin: 0;
-            }
+@section('content')
+<div class="row">
+    <div class="col-md-3" style="padding: 0px 5px 0px 5px">
+        @include('partials.sidepanel')
+    </div>
+    <div class="col-md-9" style="padding: 0px 5px 0px 5px">
+        <div class="box">
+            <div class="box-header">
+                <h3 class="box-title">NEWS & ANNOUNCEMENTS</h3>
+            </div>
+            <div class="box-body">
+                @if($announcement->count())
+                @foreach($announcement->orderBy('id','desc')->take(3)->get() as $annc)
+                <div class="box box-solid">
+                    <div class="box-header with-border">
+                        <i class="fa fa-newspaper-o"></i>
 
-            .full-height {
-                height: 100vh;
-            }
-
-            .flex-center {
-                align-items: center;
-                display: flex;
-                justify-content: center;
-            }
-
-            .position-ref {
-                position: relative;
-            }
-
-            .top-right {
-                position: absolute;
-                right: 10px;
-                top: 18px;
-            }
-
-            .content {
-                text-align: center;
-            }
-
-            .title {
-                font-size: 84px;
-            }
-
-            .title small {
-                font-size: 60px;
-            }
-
-            .links > a {
-                color: #636b6f;
-                padding: 0 25px;
-                font-size: 12px;
-                font-weight: 600;
-                letter-spacing: .1rem;
-                text-decoration: none;
-                text-transform: uppercase;
-            }
-
-            .m-b-md {
-                margin-bottom: 30px;
-            }
-        </style>
-    </head>
-    <body>
-        <div class="flex-center position-ref full-height">
-            @if (Route::has('login'))
-                <div class="top-right links">
-                    @if (Auth::check())
-                        <a href="{{ url('/home') }}">Home</a>
-                    @else
-                        <a href="{{ url('/login') }}">Login</a>
-                        <a href="{{ url('/register') }}">Register</a>
-                    @endif
+                        <h3 class="box-title">{{ $annc->title }}</h3>
+                    </div>
+                    <div class="box-body">
+                        <blockquote>
+                            {!! substr($annc->content,0,40) !!}...<a href="{{ url('news/'.$annc->id.'/show') }}">Read More</a>
+                            <small><i class="fa fa-user"></i> Posted by <b>{{ env('APP_NAME') }}</b> <cite title="Posted Date"><i class="fa fa-calendar"></i> {{ date('M d, Y h:i a',strtotime($annc->created_at)) }}</cite></small>
+                        </blockquote>
+                    </div>
                 </div>
-            @endif
-            <div class="content">
-                <div class="title m-b-md">
-                    {!! trans('titles.app') !!}<br />
-                    <small>
-                        {{ trans('titles.app2', ['version' => config('settings.app_project_version')]) }}
-                    </small>
+                @endforeach
+                @else
+                <div class="alert alert-warning">
+                    NO NEWS & ANNOUNCEMENTS HAS BEEN POST YET.
                 </div>
-                <div class="links">
-                    <a href="https://laravel.com/docs">Documentation</a>
-                    <a href="https://laracasts.com">Laracasts</a>
-                    <a href="https://laravel-news.com">News</a>
-                    <a href="https://forge.laravel.com">Forge</a>
-                    <a href="https://github.com/laravel/laravel">GitHub</a>
-                </div>
+                @endif
             </div>
         </div>
-    </body>
-</html>
+    </div>
+</div>
+@stop
+
+@section('css')
+@stop
+
+@section('js')
+@stop

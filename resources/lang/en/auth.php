@@ -19,7 +19,7 @@ return [
     // Activation items
     'sentEmail'        => 'We have sent an email to :email.',
     'clickInEmail'     => 'Please click the link in it to activate your account.',
-    'anEmailWasSent'   => 'An email was sent to :email on :date.',
+    'anEmailWasSent'   => 'An email was sent to <span class="text-red">:email</span> on <span class="text-red">:date</span>.',
     'clickHereResend'  => 'Click here to resend the email.',
     'successActivated' => 'Success, your account has been activated.',
     'unsuccessful'     => 'Your account could not be activated; please try again.',
